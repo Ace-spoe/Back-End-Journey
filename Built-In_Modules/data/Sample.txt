@@ -1,0 +1,2 @@
+Hello from fs.js
+Hello again I was appended
