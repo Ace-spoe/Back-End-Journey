@@ -1,7 +1,7 @@
 # Node JS
 - ## 1.Intro 
     -There are 2 ways of running the node code 
-     1.REPL(Run-Eval-Print-Loop) - used for testing , written in cmd,
+     1. REPL(Run-Eval-Print-Loop) - used for testing , written in cmd,
       Interactive, runs line-by-line, good for testing
      2. in .js file
       Save code permanently, run the whole program at once, good 'for building apps
@@ -9,7 +9,7 @@
 
 - ## 2.node module system 
     - Allows you to organize your code into resusable components
-    - uses the standard commom JS (which allows JS to import and export between files(modules))
+    - uses the standard common JS (which allows JS to import and export between files(modules))
     - common JS module.exports = ...  and require("")
     -Each file is a module (private by default)
     - Don't mix export and module.exports 
@@ -25,11 +25,11 @@
         - install ready made codes
         - Manage dep
         - Share your code with others
-    - Packages : reusable code made by others
+    - **Packages** : reusable code made by others
     - **Dependencies** - package required for your entire project to run
     - **DevDep** - only needed for testing and local development
     - npm install [pkgname]
-    Dep are essential when your code is cloned or used by other people also for tracking the version used
+    - Dep are essential when your code is cloned or used by other people also for tracking the version used
     - **scripts** used as shortcuts for commands you often use
     eg : ` "start": "node index.js" ` and then run `npm start`
 
@@ -37,10 +37,10 @@
 ## 4. Modules
 - ### 4.1 Path Module : 
     provides utilities for working with **file and directory paths**.
-    -Why Use It?
-      ✅ Works on any OS 
-      ✅ Handles path joining, parsing, and manipulation
-      ✅ Avoids manual string concatenation errors
+    - Why Use It?
+      -  Works on any OS 
+      -  Handles path joining, parsing, and manipulation
+      -  Avoids manual string concatenation errors
 - ### 4.2 File System :
     - allows you to **interact with the file system** — create, read, update, and delete files and folders
     - provides three styles for file operations: **Sync , callback and promises**
@@ -51,7 +51,7 @@
 - ### 4.3 HTTP Module : 
     -  allows you to **create web servers** and **make HTTP requests**.
     - `createServer()`
-    `listen()` - starts server on a port
+    - `listen()` - starts server on a port
     - **request** - an object containing everything about what the client wants.
     - **respond** - an objcet whcih contains what you send back to the client.
     
@@ -62,13 +62,13 @@
     - Async can be acheived using callbacks and node is async
     - **Callback hell** - when nesting multiple of these the code becomes what is known as **pyramid of doom** which becomes difficult to read and maintain.
 - ### 2. Promises
-    - can be used to fix what callback hell problem
+    - can be used to fix the callback hell problem
     - are objects representing a future value , think of it like a receipt from restaurant , the receipt is the promise that a food will come ,it might be resolved (as in success if you got your food) or rejected(failure so you are not getting your food for different reasons) 
     - `resolve(value)` -> goes to `.then()`
     - `reject(reason)` -> goes to `.catch()`
     - Hence `Promise` is a pending waiting to be FULFILLED (`resolve`) or REJECTED (`reject`)
      #### `Promise.all`  
-    - used when you have many different promises to handlr but those doesn't depens on each other so you use .all to compute it parallely
+    - used when you have many different promises to handle but those doesn't depend on each other so you use `.all` to compute it parallely
     - takes an array of promises
     - The catch (important): if any one of them rejects, Promise.all immediately rejects — you lose the results of the ones that succeeded.
     - When you want results even if some fail — `Promise.allSettled` 
