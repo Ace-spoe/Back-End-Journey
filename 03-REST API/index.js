@@ -1,0 +1,51 @@
+const express = require("express")
+const app = express()
+
+app.use(express.json());
+
+let books = [
+        {id: 1 , title : "Book 1"},
+        {id: 2 , title : "Book 2"},
+        {id: 3 , title : "Book 3"}
+    ];
+
+
+app.get('/', (req,res)=>{
+    res.json({
+        messgae : "Welcome"
+    })
+})
+
+app.get('/get', (req,res)=>{
+    res.json(books)
+})
+
+app.get('/get/:id', (req,res)=>{
+    const reqBookID = req.params.id;
+    const reqBook = books.find((book)=>(book.id == reqBookID))
+
+    reqBook ? res.json(reqBook) : 
+    res.status(404).json({ messgae : "Book not found!"})
+})
+
+app.post('/add', (req,res)=>{
+    const newBook = {
+        id : books.length + 1,
+        title : `Book${books.length + 1}`
+    }
+
+    books.push(newBook)
+
+    res.status(201).json({
+        data: newBook,
+        message: "New Book has been Added!"
+    })
+})
+
+
+const port = 3000;
+
+app.listen(port , ()=>{
+    console.log(`server on port : ${port}`);
+    
+})

@@ -28,3 +28,18 @@
 - `app.use()` is used to mount middlewares at a specified path.
 - `app.get()` :- is used to define routes to handle only **GET** requests. 
   - used for fetching data  
+- `app.all()` : runs for any request method(GET,POST,DELETE,...)
+
+ ### Terms 
+ - **Route** : when  a req comes in matching this METHOD + URL PATH , DO THIS. 
+   - (i.e `app.method('/urlpath'), functionX`) : this is one route
+ - **Route handler** - the callback function (functionX) from above 
+ - **Routing** - the overall process of matching the incoming req wih the correct handler from the available routes
+   ```js 
+   app.get('/users', handlerA);
+   app.post('/users', handlerB);
+   app.get('/products', handlerC);
+   ```
+   - Say when `GET/products` is requested , Express's routing system checks which one matches and choose the proper handler (that is handlerC in the above example)
+
+ - **Router** : a mini version of app used for grouping routes like a container in their own file instead of one giant `app.js`

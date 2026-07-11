@@ -50,3 +50,16 @@ app.get('/products/:Dynamicid', (req,res)=>{
     console.log(`server listening to ${port}`);
     
  })
+
+
+
+//Router Example
+
+    // routes/products.js
+    // const router = express.Router();
+    // router.get('/:id', (req, res) => { ... });
+    // router.get('/', (req, res) => { ... });
+    // module.exports = router;
+
+    // // app.js
+    // app.use('/products', require('./routes/products'));
