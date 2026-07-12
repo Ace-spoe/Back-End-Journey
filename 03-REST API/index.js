@@ -42,6 +42,47 @@ app.post('/add', (req,res)=>{
     })
 })
 
+app.put('/update/:id', (req, res) => {
+    const findBook = books.find(book => book.id == req.params.id);
+
+    if (findBook) {
+       findBook.title = req.body?.title || findBook.title; 
+       //The ?. operator means "only access title if req.body exists."
+
+        return res.status(200).json({
+            message: `Book with ID ${req.params.id} updated successfully!`,
+            data: findBook
+        });
+    }
+
+    return res.status(404).json({
+        message: "Book not Found!"
+    });
+});
+   
+// I missed th slash(/) in '/delete/:id' as in like I wrote 'delete/:id' that's why it wasn't working :_
+ 
+app.delete('/delete/:id', (req,res)=>{
+    const IndexOfCurrent = books.findIndex(book=> book.id == req.params.id)
+
+    if(IndexOfCurrent !== -1){
+        const deletedBook = books.splice(IndexOfCurrent,1);
+
+        res.status(200).json({
+            message: `Book with ID ${req.params.id} was deleted successfully!`,
+            data: deletedBook[0]
+        });
+    }
+    else{
+        res.status(404).json({
+        message: "Book not Found!"
+    });
+    }
+    
+
+})
+
+
 
 const port = 3000;
 
