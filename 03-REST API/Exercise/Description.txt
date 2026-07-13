@@ -1,0 +1,32 @@
+/*
+
+## Exercise: Habit Tracker REST API
+
+**Data model** — each habit should have:
+- `id`
+- `name` (e.g. "Fajr", "Read 20 min")
+- `frequency` (e.g. "daily", "weekly")
+- `streak` (number, starts at 0)
+- `completedDates` (array of date strings, e.g. `["2026-07-10", "2026-07-11"]`)
+- `createdAt`
+
+**Required routes:**
+
+1. `GET /habits` — return all habits
+2. `GET /habits/:id` — return one habit by id; return 404 if it doesn't exist
+3. `POST /habits` — create a new habit; validate that `name` and `frequency` are present, return 400 if missing
+4. `PUT /habits/:id` — update a habit's name/frequency; 404 if not found
+5. `DELETE /habits/:id` — delete a habit; 404 if not found
+6. `PATCH /habits/:id/complete` — mark today's date as completed for that habit: add today's date to `completedDates` if not already there, and increment `streak`. Think about: what should happen if it's already marked done today? (shouldn't double-increment)
+7. `GET /habits?frequency=daily` — bonus/extra route: filter habits by frequency using a query param
+
+**Constraints to force real thinking, not copying:**
+- Store habits in an in-memory array (no DB yet)
+- Use proper status codes: 200 (success), 201 (created), 400 (bad input), 404 (not found)
+- Handle the edge case in route 6 yourself — don't just increment blindly
+- Structure it with at least routes separated from logic (even a simple `routes/habits.js` + logic in the same file is fine at this stage, doesn't need to be fancy yet)
+
+Build it fully before checking anything against his code. If you get stuck on syntax specifically (not logic), that's when you peek — not before.
+*/
+
+
