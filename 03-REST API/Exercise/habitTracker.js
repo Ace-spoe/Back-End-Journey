@@ -1,13 +1,17 @@
 const express = require("express");
 const app = express();
 
+
+app.use(express.json());
+//So the error in post (even though my input was valid it was still saying 400 ) is because I had no `app.use(express.json());`
+
 let habits = [
     {
-        id : 1,
         name : "Demo Habit",
         frequency : "daily",
-        streak : 1,
-        completedDates : '',
+        id : 1,
+        streak : 0,
+        completedDates :[],
         createdAt : ''
     }
 ];
@@ -18,9 +22,9 @@ app.get('/', (req,res)=>{
     res.send("Welcome to the Habit tracker ")
 })
 
-app.get('/habits', (req,res)=>{
-    res.json(habits)
-})
+// app.get('/habits', (req,res)=>{
+//     res.json(habits)
+// })
 
 app.get('/habits/:id', (req,res)=>{
     const reqHabit = habits.find(habit => habit.id == req.params.id)
@@ -61,18 +65,19 @@ app.post('/habits', (req,res)=>{
 app.put('/habits/:id',(req,res)=>{
     const reqHabit = habits.find(habit => habit.id == req.params.id);
     if(!reqHabit){
-         res.status(400).json({
+         res.status(404).json({
             message : 'Habit not Found!'
         })
     }
     //You can send only one response per request. so
     else{
-        reqHabit.id = habits.length + 1;
+        
+        // reqHabit.id = reqHabit.id
         reqHabit.name = req.body?.name || reqHabit.name
         reqHabit.frequency = req.body?.frequency || reqHabit.frequency;
-        reqHabit.streak = 0;
-        reqHabit.createdAt = new Date().toLocaleString('en-US') 
-        reqHabit.completedDates=[]
+        reqHabit.streak =  0;
+        reqHabit.createdAt = new Date().toLocaleDateString('en-US');
+        reqHabit.completedDates = []
 
         res.json({
             message: "Updated Successully!",
@@ -85,17 +90,18 @@ app.put('/habits/:id',(req,res)=>{
 app.delete('/habits/:id', (req, res)=>{
     const unwantedHabit = habits.find(habit => habit.id == req.params.id);
     if(!unwantedHabit){
-         res.status(400).json({
-            message : 'Habit not Found!'
+        //return to stop exe. after 404
+        return res.status(404).json({
+            message : 'Habit not found!'
         })
     }
     // if we had wanted the first match to be returned , we would have used .find , if you need all matches use .filter
     else{
-        const  wantedHabit = habits.filter(habit => habit.id !== unwantedHabit.id)
+          habits = habits.filter(habit => habit.id !== unwantedHabit.id)
 
         res.json({
             message : "Deleted Successfully!",
-            data : wantedHabit
+            data : unwantedHabit
         })
     }
 })
@@ -108,23 +114,52 @@ app.patch('/habits/:id/complete' , (req ,res)=>{
         })
     }
     else{
-        let date = new Date().toLocaleDateString('en-US');
+
+        const date = new Date().toLocaleDateString('en-US');
         
         if(!reqHabit.completedDates.includes(date)){
             reqHabit.completedDates.push(date);
             reqHabit.streak += 1 ;
         }
         
+        res.json({
+            message : 'updated succssfully',
+            data : reqHabit
+        })
+        
     }
 })
 // req.query is how you get data sent in the URL after the ? sign.
 app.get('/habits', (req,res) =>{
-    const FilteredByfrequency = habits.filter(habit => habit.frequency == req.query.frequency)
-    !FilteredByfrequency ? 
-    res.status(404).json({
-        message: 'Habit not Found!'
-    }):
-    res.json(FilteredByfrequency)
+//No query case
+    if(!req.query.frequency){
+        return res.json(habits);
+    }
+
+    // if(req.query.frequency){ 
+        // req.query.freequency should be checked cause if not if the user don't enter frequency here I I will comaprsion will be habit.frequecny === undefined which will result in no habits that means it will interfer with the other get codes so solution : Only apply the filter if the user actually sent the frequency in the query.
+        //}
+
+        let habitsFilteredByfrequency = habits.filter(habit => habit.frequency == req.query.frequency)
+    
+    
+    //filter always return an array even if empty adn cause even [] is also true in js I shouldn't be using !habitsFilteredByfrequency
+
+    if(habitsFilteredByfrequency.length == 0) {
+        // used if else instead of ternary cause it gets messy when codes are longer
+
+        //Rule of thumb: Use ternary for simple values. Use if-else for logic and responses.
+        return res.json({
+        message: 'No habit with  given frequency!'
+    })
+    } 
+    else{
+        res.json({
+        message : `Found`,
+        count: habitsFilteredByfrequency.length,
+        data: habitsFilteredByfrequency})
+    }
+    
 
 })
 
