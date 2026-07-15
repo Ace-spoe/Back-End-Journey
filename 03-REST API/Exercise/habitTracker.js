@@ -98,7 +98,7 @@ app.delete('/habits/:id', (req, res)=>{
     // if we had wanted the first match to be returned , we would have used .find , if you need all matches use .filter
     else{
           habits = habits.filter(habit => habit.id !== unwantedHabit.id)
-
+        // We can do res.status(204) for no content and return no data
         res.json({
             message : "Deleted Successfully!",
             data : unwantedHabit

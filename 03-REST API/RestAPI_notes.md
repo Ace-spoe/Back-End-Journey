@@ -17,3 +17,6 @@ In simple terms:
 - **Resource** : Any object or data.
 - **Endpoint** : A specific URL for a resource.
 - **Payload** : Data sent in the request body (usually JSON).
+
+- `node --watch index.js` : if you are tired of typing ctrl + c everytime you change your code , it automatically track changes (but still you have to refresh the browser )
+    - you can add `"dev": "node --watch index.js"` inisde the script in package.json and then strat the server `npm run dev` , unlike when running the start or test scripts, the command must include run.
