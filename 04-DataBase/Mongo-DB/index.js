@@ -5,12 +5,18 @@ dns.setServers(['1.1.1.1', '8.8.8.8']);
 
 const mongoose = require("mongoose");
 
-require('dotenv').config();
+require('dotenv').config();// to use the variables inside .env and It's important that dotenv gets imported before the  model is imported
+
+mongoose.connection.on('error', err => {
+    console.error('MongoDB connection error:', err);
+});
 
 mongoose.connect(process.env.MONGO_URI)
 .then(()=> console.log("Data base connected"))
 .catch((err)=> console.log(err)
-)
+);
+
+
 
 const userSchema = new mongoose.Schema({
     name : String,

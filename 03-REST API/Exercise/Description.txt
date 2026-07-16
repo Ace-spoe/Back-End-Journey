@@ -30,3 +30,13 @@ Build it fully before checking anything against his code. If you get stuck on sy
 */
 
 
+//PART 2 OF THE EXERCISE : ADDING DB
+1.GET all → real DB. Change your GET /habits route to fetch from MongoDB instead of the array. Get this one route fully working end-to-end before touching anything else — confirms your connection/schema is solid.
+
+2.POST → real DB. Change habit creation to save to MongoDB instead of pushing to the array. Keep it simple — you can ignore duplicate-name checking for now, same as FSO tells its students.
+3. GET by id → real DB, using findById. Important gotcha to handle yourself: what should happen when someone requests an id that's correctly formatted but doesn't exist in the DB (Mongoose returns null, not an error) — that's different from a malformed id (which does throw). Your 404 logic needs to catch the null case explicitly.
+
+4. DELETE → real DB, using findByIdAndDelete (or equivalent).
+5.PUT/PATCH → real DB, using findByIdAndUpdate. This is also where you should actually apply the PUT-vs-PATCH fix we talked about earlier — good timing to close that loop.
+
+6.Error handling exercise (important, don't skip): try hitting your routes with a malformed id (e.g. /habits/123abc — not a valid MongoDB ObjectId format) and see what happens. FSO has you build proper error-handling middleware for this — a centralized handler that catches CastError (bad id format) and returns 400, instead of your server crashing or hanging. Build this now rather than scattering try/catch everywhere.
