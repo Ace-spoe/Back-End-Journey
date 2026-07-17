@@ -25,6 +25,23 @@ mongoose.connect(process.env.MONGO_URI)
 app.use(express.json());
 
 
+ function errorHandler (error, req, res , next){
+    if (error.name === "CastError") {
+            return res.status(400).json({ error: "Malformed ID" });
+            
+        }
+     if (error.name === 'ValidationError') {
+        return res.status(400).json({ error: error.message });
+    }
+        res.status(500).json({ 
+            error: error.message 
+        });
+       
+}
+
+
+
+
 const habitSchema = new mongoose.Schema({
     name: {
         type: String,
@@ -46,7 +63,7 @@ const habitSchema = new mongoose.Schema({
     },
     createdAt: {
         type: Date,
-        default: () => {new Date().toLocaleString('en-US')}
+        default: () =>  Date.now()
     }
 });
 
@@ -54,11 +71,11 @@ const habitSchema = new mongoose.Schema({
 const Habit = mongoose.model('Habit', habitSchema);
 
 
-app.get('/', (req,res)=>{
+app.get('/', (req,res,next)=>{
     res.send("Welcome to the Habit tracker ")
 })
 
-app.get('/habits', async (req,res) => {
+app.get('/habits', async (req,res,next) => {
     try{
         const habits = await Habit.find({});
 
@@ -86,11 +103,11 @@ app.get('/habits', async (req,res) => {
             filteredData: filtByFreq 
         });
     } catch(error){
-        res.status(500).json({error : error.message})
+         next(error);
     }
 })
 
-app.get('/habits/:id', async (req,res) => {
+app.get('/habits/:id', async (req,res,next) => {
     try{
          const habitByID = await Habit.findById(req.params.id);
          if(!habitByID){
@@ -103,18 +120,12 @@ app.get('/habits/:id', async (req,res) => {
             data : habitByID
          });
     }catch(error){
-        if(error.name === 'CastError'){
-            return res.status(400).json({
-                error: 'Malformatted ID', 
-                message: 'Invalid ID format. Must be a 24-character hex string.' 
-            })
-        }
-        res.status(500).json({error : error.message})
+         next(error);
     }
    
 })
 
-app.post('/habits', async (req,res)=>{
+app.post('/habits', async (req,res,next)=>{
     if(!req.body.name || !req.body.frequency){
         return res.status(400).json({//Bad request
             message : "Please insert the appropriate fields"
@@ -130,12 +141,12 @@ app.post('/habits', async (req,res)=>{
             data : newHabit
         })
     }catch(error){
-        res.status(500).json({error : error.message});
+        next(error);
     }
     
 })
 
-app.delete('/habits/:id', async (req,res)=>{
+app.delete('/habits/:id', async (req,res,next)=>{
     try {
         const deletedHabit = await Habit.findByIdAndDelete(req.params.id);
 
@@ -153,18 +164,11 @@ app.delete('/habits/:id', async (req,res)=>{
 
 
     }catch(error){
-        if(error.name === "CastError"){
-            return res.status(400).json({
-                error : "Malformed error"
-            })
-        }
-        return res.status(500).json({
-            error : error.message
-        })
+         next(error);
     }
 })
 
-app.put('/habits/:id/' , async (req,res)=>{
+app.put('/habits/:id/' , async (req,res,next)=>{
     try{
         const {name , frequency} = req.body;
         const updatedHabit = await Habit.findByIdAndUpdate(
@@ -186,55 +190,56 @@ app.put('/habits/:id/' , async (req,res)=>{
                 data : updatedHabit
             })
     }catch(error){
-        if(error.name === 'CastError'){
-            return res.status(400).json({
-                error : "Malformed error"
-            })
-        }
-        res.status(500).json({
-            error : error.message
-        })
+         next(error);
     }
 })
 
-app.patch('/habits/:id/complete', async (req,res)=>{
+app.patch('/habits/:id/complete', async (req,res,next)=>{
     try{
         const habitById = await Habit.findById(req.params.id);
-        const today = new Date().toLocaleDateString('en-US');
+        const today = new Date().toDateString();
 
         if(!habitById){
             return res.status(404).json({
                 message : "Habit not found!",
             })
         }
-        
-        const updatedHabit = await Habit.findByIdAndUpdate(
-            req.params.id,
-            {
-                $push : { completedDates : new Date().toLocaleString('en-US')},
-                $inc : {streak : 1} 
-            },
-            {
-                 new : true ,
-                runValidators : true
-            }
-        )
+
+        const completedDatesAlteredArray = habitById.completedDates.map(date => date.toDateString())
+        if(completedDatesAlteredArray.includes(today)){
+            return res.status(400).json({
+                message : "Already Registered"
+            })
+        }
+
+        // const updatedHabit = await Habit.findByIdAndUpdate(
+        //     req.params.id,
+        //     {
+        //         $push : { completedDates : new Date().toLocaleString('en-US')},
+        //         $inc : {streak : 1} 
+        //     },
+        //     {
+        //          new : true ,
+        //         runValidators : true
+        //     }
+        // )
+
+        habitById.completedDates.push(today);
+        habitById.streak += 1
+        const updatedHabit = await habitById.save(); 
         res.json({
             message : 'Updated successfully!',
             data : updatedHabit
         })
 
+         
+
     }catch(error){
-        if(error.name === "CastError"){
-            return res.status(400).json({ error: "Malformed ID" });
-        }
-         res.status(500).json({ 
-            error: error.message 
-        });
+        next(error);
     }
 })
 
-
+app.use(errorHandler);
 
 const PORT = process.env.PORT;
 app.listen(PORT, () => {
