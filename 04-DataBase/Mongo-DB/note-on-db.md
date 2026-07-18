@@ -36,7 +36,10 @@ Note.find({}).then(result => {
 //All notes
 ```
 
-
+### Lint / linter
+- any tool that detects and flags errors in programming languages, including stylistic errors.
+- the leading tool in JS is **ESlint**.
+- added to dev dependencies
 
 
 
@@ -58,5 +61,5 @@ Note.find({}).then(result => {
   - documnent based databases like mongo are schemaless.
 
   - **process.argv** is an array containing all command-line arguments passed when you run your Node.js script.
-  - **process.exit(1)** - exit with error
+  - **process.exit(1)** - exit with error.
 

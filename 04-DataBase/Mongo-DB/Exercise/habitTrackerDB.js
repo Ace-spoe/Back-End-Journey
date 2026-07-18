@@ -45,6 +45,7 @@ app.use(express.json());
 const habitSchema = new mongoose.Schema({
     name: {
         type: String,
+        minlength : 2,
         required: true
     },
     frequency: {
