@@ -40,6 +40,12 @@ Note.find({}).then(result => {
 - any tool that detects and flags errors in programming languages, including stylistic errors.
 - the leading tool in JS is **ESlint**.
 - added to dev dependencies
+- catches syntax error , stylistic problems(indentation ,**;**,..) , dangerous patterns(using == instead of ===, unused variables, etc.)
+- ESLint rules are guidelines, not laws so we might need the code but the lint might flag it example the `next` arg i nthe errorHanadler middleware , so in this case a framework's requirement and ESLint guideline clashed but we fixed it using the inline commnet above our middle ware code :
+```js 
+// eslint-disable-next-line no-unused-vars
+async function errorHandler(error, req, res, next) {
+```
 
 
 
