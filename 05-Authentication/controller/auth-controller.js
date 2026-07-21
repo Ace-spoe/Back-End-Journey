@@ -2,6 +2,7 @@
 /*eslint-disable*/
 const User = require('../models/User')
 const bcrypt = require('bcryptjs')
+const generateToken = require('../utils/generateToken')
 //original
 // const registerUser = async(req , res) => {
 //     try{
@@ -148,10 +149,12 @@ const loginUser = async(req ,res) => {
     })
   }
 
+  const accessToken = generateToken(user)
  res.json({ 
   success: true,
   message: 'Login successful',
-   user: { id: user._id,
+  token : accessToken,
+  userData: { id: user._id,
            username: user.username,
            email: user.email,
            role: user.role

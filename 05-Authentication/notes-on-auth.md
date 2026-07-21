@@ -13,3 +13,4 @@
 ```
 ### **Tokens**
  - **JWT**(JSON Web Tokens) : 
+ - `node -e "console.log(require('crypto').randomBytes(64).toString('hex'))"` : used to generated a random string

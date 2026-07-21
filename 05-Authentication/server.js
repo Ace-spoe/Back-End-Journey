@@ -3,7 +3,8 @@ require('dotenv').config({ path : '../.env' })
 const express = require('express')
 const connectToDB = require('./dataBase/db')
 const authRoutes = require('./routes/auth-routes')
-
+const homeRoutes = require('./routes/home-routes')
+const adminRoutes = require('./routes/admin-routes') 
 if(!process.env.PORT){
   console.log('PORT is undefined')
   process.exit(1)
@@ -12,7 +13,8 @@ if(!process.env.PORT){
 const app = express()
 app.use(express.json())
 app.use('/api/auth' , authRoutes)
-
+app.use('/api/home', homeRoutes)
+app.use('/api/admin', adminRoutes)
 app.get('/health', (req, res) => res.status(200).json({ status: 'ok' }))
 
 
