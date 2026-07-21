@@ -1,66 +1,66 @@
-//Had to use these in the top 
-const dns = require('node:dns');
-dns.setServers(['1.1.1.1', '8.8.8.8']);
+//Had to use these in the top
+const dns = require('node:dns')
+dns.setServers(['1.1.1.1', '8.8.8.8'])
 
 
-const mongoose = require("mongoose");
+const mongoose = require('mongoose')
 
-require('dotenv').config();// to use the variables inside .env and It's important that dotenv gets imported before the  model is imported
+require('dotenv').config()// to use the variables inside .env and It's important that dotenv gets imported before the  model is imported
 
 mongoose.connection.on('error', err => {
-    console.error('MongoDB connection error:', err);
-});
+  console.error('MongoDB connection error:', err)
+})
 
 mongoose.connect(process.env.MONGO_URI)
-.then(()=> console.log("Data base connected"))
-.catch((err)=> console.log(err)
-);
+  .then(() => console.log('Data base connected'))
+  .catch((err) => console.log(err)
+  )
 
 
 
 const userSchema = new mongoose.Schema({
-    name : String,
-    email : String,
-    age : Number,
-    isActive : Boolean,
-    tags : [String],
-    createdAt : {
-        type : Date , 
-        default : Date.now()}
+  name : String,
+  email : String,
+  age : Number,
+  isActive : Boolean,
+  tags : [String],
+  createdAt : {
+    type : Date ,
+    default : Date.now() }
 })
 
 
-const User = mongoose.model('User' , userSchema);
+const User = mongoose.model('User' , userSchema)
 
 async function runQueryExample(){
-    try{
-        // const newUser = await User.create({
-        //     name : "Joe",
-        //     email : 'Joe@gmail.com',
-        //     age : '40',
-        //     isActive : true,
-        //     tags : ['developer' , 'manager'],
-            
-        // })
+  try{
+    // const newUser = await User.create({
+    //     name : "Joe",
+    //     email : 'Joe@gmail.com',
+    //     age : '40',
+    //     isActive : true,
+    //     tags : ['developer' , 'manager'],
 
-        // console.log('Created a new User');
+    // })
 
-        const allUsers = await User.find({});
+    // console.log('Created a new User');
 
-        console.log(User);
-        
-        
-        
-    }catch(err){
+    const allUsers = await User.find({})
 
-        console.log(`Error ->` , err);
+    console.log(User)
 
-    }finally{
-        await mongoose.connection.close()
-    }
+
+
+  }catch(err){
+
+    console.log('Error ->' , err)
+
+  }finally{
+    await mongoose.connection.close()
+  }
 }
 
-runQueryExample();
+runQueryExample()
 
 
 // const express = require('express');

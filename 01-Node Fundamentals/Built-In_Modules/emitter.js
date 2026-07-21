@@ -15,18 +15,18 @@
 //         super();
 //         this.users = [];
 //     }
-    
+
 //     join(username) {
 //         this.users.push(username);
 //         // Emit event: someone joined
 //         this.emit('user-joined', username);
 //     }
-    
+
 //     sendMessage(username, message) {
 //         // Emit event: a message was sent
 //         this.emit('message', username, message);
 //     }
-    
+
 //     leave(username) {
 //         this.users = this.users.filter(user => user !== username);
 //         // Emit event: someone left
@@ -65,65 +65,65 @@
 // // 👋 Alice left the chat
 // // 👥 Users online: Bob
 
-//Downlaod Manager 
-const EventEmitter = require('events');
+//Downlaod Manager
+const EventEmitter = require('events')
 
 class DownloadManager extends EventEmitter {
-    downloadFile(url) {
-        console.log(`📥 Starting download: ${url}`);
-        this.emit('start', url);
-        
-        // Simulate download progress
-        let progress = 0;
-        const interval = setInterval(() => {
-            progress += 10;
-            this.emit('progress', url, progress);
-            
-            if (progress >= 100) {
-                clearInterval(interval);
-                this.emit('complete', url);
-                this.emit('end', url);
-            }
-        }, 500);
-        
-        // Simulate possible error
-        if (url.includes('error')) {
-            setTimeout(() => {
-                this.emit('error', url, 'Invalid URL');
-            }, 1000);
-        }
+  downloadFile(url) {
+    console.log(`📥 Starting download: ${url}`)
+    this.emit('start', url)
+
+    // Simulate download progress
+    let progress = 0
+    const interval = setInterval(() => {
+      progress += 10
+      this.emit('progress', url, progress)
+
+      if (progress >= 100) {
+        clearInterval(interval)
+        this.emit('complete', url)
+        this.emit('end', url)
+      }
+    }, 500)
+
+    // Simulate possible error
+    if (url.includes('error')) {
+      setTimeout(() => {
+        this.emit('error', url, 'Invalid URL')
+      }, 1000)
     }
+  }
 }
 
 // Create download manager
-const downloader = new DownloadManager();
+const downloader = new DownloadManager()
 
 // Listen to all events
 downloader.on('start', (url) => {
-    console.log(`🚀 Download started for ${url}`);
-});
+  console.log(`🚀 Download started for ${url}`)
+})
 
 downloader.on('progress', (url, progress) => {
-    console.log(`⏳ ${url}: ${progress}%`);
-});
+  console.log(`⏳ ${url}: ${progress}%`)
+})
 
 downloader.on('complete', (url) => {
-    console.log(`✅ Download complete: ${url}`);
-});
+  console.log(`✅ Download complete: ${url}`)
+})
 
 downloader.on('error', (url, error) => {
-    console.log(`❌ Error downloading ${url}: ${error}`);
-});
+  console.log(`❌ Error downloading ${url}: ${error}`)
+})
 
 downloader.on('end', (url) => {
-    console.log(`🏁 Finished processing: ${url}`);
-    console.log('---');
-});
+  console.log(`🏁 Finished processing: ${url}`)
+  console.log('---')
+})
 
 // Start downloads
-downloader.downloadFile('https://example.com/file1.zip');
+downloader.downloadFile('https://example.com/file1.zip')
 setTimeout(() => {
-    downloader.downloadFile('https://example.com/error-file.zip');
-}, 3000);
+  downloader.downloadFile('https://example.com/error-file.zip')
+}, 3000)
 
 // Output: Events flow naturally as the download progresses!

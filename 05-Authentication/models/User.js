@@ -1,33 +1,33 @@
 const mongoose = require('mongoose')
 
 const userSchema = new mongoose.Schema({
- username : {
+  username : {
     type : String,
     required : true,
     unique : true,
     trim : true
- },
- email : {
+  },
+  email : {
     type : String,
     required : true,
     unique : true,
     trim : true,
     lowercase : true
- },
- password : {
+  },
+  password : {
     type : String,
     required : true,
- },
- role : {
+  },
+  role : {
     type : String,
     enum : ['user' , 'admin'],
     default: 'user',
- }
+  }
 
-}, {timestamps : true}) 
+}, { timestamps : true })
 // {timestamps : true} automatically add and manage two fileds :
 // createdAt: { type: Date, default: Date.now }  // When created
-// updatedAt: { type: Date, default: Date.now }  
+// updatedAt: { type: Date, default: Date.now }
 // When last updated
 
 

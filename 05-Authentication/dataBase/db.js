@@ -3,20 +3,21 @@ dns.setServers(['1.1.1.1','8.8.8.8'])
 
 const mongoose = require('mongoose')
 if(!process.env.MONGO_URI){
-    console.log('MONGO_URI problem');
-    
-    process.exit(1)
+  console.log('MONGO_URI problem')
+
+  process.exit(1)
 }
+
 const connectToDB = async () => {
-    try{
-        await mongoose.connect(process.env.MONGO_URI)
-        console.log('DataBase connected successfully!')
+  try{
+    await mongoose.connect(process.env.MONGO_URI)
+    console.log('DataBase connected successfully!')
 
-    }catch(err){
+  }catch(err){
 
-         console.log('DB onnection Failed')
-        process.exit(1)
-    }
+    console.log('DB connection Failed :', err)
+    process.exit(1)
+  }
 }
 
 module.exports = connectToDB

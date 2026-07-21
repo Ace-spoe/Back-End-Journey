@@ -1,34 +1,34 @@
- const express = require("express");
- const app = express();
- 
- //app level settings
+const express = require('express')
+const app = express()
 
- app.set("view engine" , "ejs");
- 
+//app level settings
 
- //routing
-
-  app.get('/', (req,res)=>{
-    res.send("home page ")
- })
+app.set('view engine' , 'ejs')
 
 
-  app.post('/api/data', (req,res)=>{
-    res.json({
-        message : "Data recieved",
-        data : req.body
-    })
- })
+//routing
+
+app.get('/', (req,res) => {
+  res.send('home page ')
+})
 
 
- app.use((err , req , res , next)=>{
-    console.log(err.stack);
-    res.status(500).send("Some thing went wrong")
-    
- })
+app.post('/api/data', (req,res) => {
+  res.json({
+    message : 'Data recieved',
+    data : req.body
+  })
+})
 
- const port = 3000;
- app.listen(port , ()=>{
-    console.log(`server listening to ${port}`);
-    
- })
+
+app.use((err , req , res , next) => {
+  console.log(err.stack)
+  res.status(500).send('Some thing went wrong')
+
+})
+
+const port = 3000
+app.listen(port , () => {
+  console.log(`server listening to ${port}`)
+
+})

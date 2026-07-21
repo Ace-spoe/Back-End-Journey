@@ -1,6 +1,6 @@
 const calc = require('./NMS')
-calc.greet();
-console.log(`Add 1 and 2`,calc.add(1,2));
-console.log(`Substract 1 from 2`,calc.sub(1,2));
-console.log(`multiply 1 by 2`,calc.mult(1,2));
-console.log(`divide 1 by 2`,calc.divide(1,2));
+calc.greet()
+console.log('Add 1 and 2',calc.add(1,2))
+console.log('Substract 1 from 2',calc.sub(1,2))
+console.log('multiply 1 by 2',calc.mult(1,2))
+console.log('divide 1 by 2',calc.divide(1,2))

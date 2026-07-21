@@ -1,9 +1,9 @@
-console.log("Exploere page");
+console.log('Exploere page')
 
-console.log('exp-filename' , __filename);
+console.log('exp-filename' , __filename)
 
 function greet(){
-    console.log("Hi");
-    
+  console.log('Hi')
+
 }
-module.exports = {greet}
+module.exports = { greet }

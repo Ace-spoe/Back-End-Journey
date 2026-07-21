@@ -1,4 +1,4 @@
-const explorer = require("./Explorer")
-console.log("Demo page");
+const explorer = require('./Explorer')
+console.log('Demo page')
 explorer.greet()
-console.log('demo-filename' , __filename);
+console.log('demo-filename' , __filename)
