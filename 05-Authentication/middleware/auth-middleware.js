@@ -1,26 +1,36 @@
 
 const jwt = require('jsonwebtoken')
-const authmiddleware = (req , res , next) => {
-   const authHeader = req.header['authorization']
-   const token = authHeader && authHeader.split(" ")[1]
 
-   if(!token){}
-   return res.status(401).json({
-    success : fasle,
-    message : 'Access denied , pls log in'
-   })
+const authmiddleware = (req , res , next) => {
+   
+   const authHeader = req.headers['authorization']
+   const token = authHeader && authHeader.split(" ")[1]
+   console.log(token)
+   if(!token){
+      return res.status(401).json({
+      success : false,
+      message : 'Access denied , pls log in'
+      })
+   }
+
+   if(!process.env.JWT_SECRET){
+      console.log('JWT not defined')
+      process.exit(1)
+   }
+   
 
    try{
     const decodedTokenInfo = jwt.verify(token,process.env.JWT_SECRET)
-    console.log(decodedToken);
+
+    console.log(decodedTokenInfo);
 
     req.userInfo = decodedTokenInfo
     next()
     
    }catch(err){
-    return res.status(500).json({
-    success : fasle,
-    message :  'Interval server error'
+    return res.status(401).json({
+    success : false,
+    message : 'Invalid token'
    })
    }
 

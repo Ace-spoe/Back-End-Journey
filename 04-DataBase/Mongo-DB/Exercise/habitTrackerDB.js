@@ -108,7 +108,7 @@ app.get('/habits', async (req,res,next) => {
   }
 })
 
-Iapp.get('/habits/:id', async (req,res,next) => {
+app.get('/habits/:id', async (req,res,next) => {
   try{
     const habitByID = await Habit.findById(req.params.id)
     if(!habitByID){
