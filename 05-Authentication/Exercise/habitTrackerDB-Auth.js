@@ -7,7 +7,7 @@ const dotenv = require('dotenv')
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 
-dotenv.config({ path : '../../../.env' })
+dotenv.config({ path : '../../.env' })
 
 if (!process.env.MONGO_URI) {
   console.error('❌ MONGO_URI is undefined! Check your .env file')
@@ -227,8 +227,6 @@ app.use('/api/auth', authrouter)
 //AUTHENTICATION MIDDLEWARES
 const authmiddlware = (req ,res , next) => {
     try{
-
-        
         const authHeader = req.headers['authorization']
 
         if(!authHeader){
@@ -237,6 +235,7 @@ const authmiddlware = (req ,res , next) => {
                 message : 'No header'
             })
         }
+
         const token = authHeader && authHeader.split(" ")[1]
 
         if(!token){
@@ -269,7 +268,7 @@ const authmiddlware = (req ,res , next) => {
     }
 
 }
-
+// CRUD
 app.get('/', (req,res) => {
   res.send('Welcome to the Habit tracker ')
 })
@@ -307,7 +306,7 @@ app.get('/habits', authmiddlware ,async (req,res,next) => {
   }
 })
 
-app.get('/habits/:id' ,authmiddlware,async (req,res,next) => {
+app.get('/habits/:id' , authmiddlware ,async (req,res,next) => {
   try{
     
     const habitByID = await Habit.findOne({
@@ -330,7 +329,7 @@ app.get('/habits/:id' ,authmiddlware,async (req,res,next) => {
 
 })
 
-app.post('/habits', authmiddlware, async (req,res,next) => {
+app.post('/habits', authmiddlware , async (req,res,next) => {
 
   if(!req.body.name || !req.body.frequency){
     return res.status(400).json({ //Bad request
@@ -376,7 +375,7 @@ app.delete('/habits/:id', authmiddlware ,async (req,res,next) => {
   }
 })
 
-app.put('/habits/:id/' , authmiddlware, async(req,res,next) => {
+app.put('/habits/:id/' , authmiddlware , async(req,res,next) => {
   try{
     const { name , frequency } = req.body
     const updatedHabit = await Habit.findOneAndUpdate(
@@ -405,12 +404,13 @@ app.put('/habits/:id/' , authmiddlware, async(req,res,next) => {
   }
 })
 
-app.patch('/habits/:id/complete',authmiddlware ,async (req,res,next) => {
+app.patch('/habits/:id/complete', authmiddlware ,async (req,res,next) => {
   try{
     const habitById = await Habit.findOne({
        _id: req.params.id, 
        userId: req.userInfo.userId 
     })
+
     const today = new Date().toDateString()
 
     if(!habitById){
