@@ -1,11 +1,14 @@
 const dns = require('node:dns')
 dns.setServers(['1.1.1.1', '8.8.8.8'])
-
+const path = require('path')
+const fs = require('fs')
 const mongoose = require('mongoose')
 const express = require('express')
 const dotenv = require('dotenv')
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
+const multer = require('multer')
+const cloudinary = require('cloudinary').v2
 
 dotenv.config({ path : '../../.env' })
 
@@ -96,10 +99,75 @@ const userSchema = new mongoose.Schema({
         type : String,
         enum : ['user' , 'admin'],
         default : 'user'
+    },
+    profilePicture : {
+      url : { type : String },
+      public_id : { type : String }
     }
+
 },{timestamps : true})
 
 const HabitUser = mongoose.model('HabitUser' , userSchema)
+
+
+// const imageSchema = new mongoose.Schema({
+
+//   url : {
+//     type: String , required: true
+//   } ,
+//   publicId : {
+//     type: mongoose.Schema.Types.ObjectId , required: true
+//   } ,
+//   uploadesBy : {
+//     type : mongoose.Schema.Types.ObjectId , 
+//     ref : 'HabitUser',
+//     required : true
+//   }
+// })
+// const Image = mongoose.model('Image' , imageSchema)
+
+// Setting up multer and cloudinary
+cloudinary.config({
+    cloud_name : process.env.CLOUDINARY_CLOUD_NAME ,
+    api_key : process.env.CLOUDINARY_API_KEY ,
+    api_secret : process.env.CLOUDINARY_API_SECRET
+
+})
+
+const storage = multer.diskStorage({
+  destination : function (req , file , cb){
+    cb(null , './uploads')
+  },
+  filename : function (req , file , cb){
+    cb(null , 
+      Date.now() + '-'+ file.originalname
+    )
+  }
+})
+
+
+const checkfileType = function (req , file , cb){
+  if(file.mimetype.startsWith('image')){
+    cb(null , true)
+  }else{
+cb(new Error('File type is not image'), false)
+  }
+}
+
+const upload = multer({
+  storage : storage,
+  fileFilter : checkfileType,
+  limits :{ fileSize : 5 * 1024 * 1024} //5MB
+})
+
+//UPLOADING TO CLOUDINARY
+
+const uploadImage = async (filePath) => {
+  const result = await cloudinary.cloud.upload(filePath)
+  return result
+}
+
+
 
 //REGISTER AND LOGIN ROUTERS
 
@@ -224,6 +292,9 @@ authrouter.post('/login', async (req , res, next) => {
 
 app.use('/api/auth', authrouter)
 
+
+
+
 //AUTHENTICATION MIDDLEWARES
 const authmiddlware = (req ,res , next) => {
     try{
@@ -268,6 +339,47 @@ const authmiddlware = (req ,res , next) => {
     }
 
 }
+// // UPLOAD AVATAR ROUTE :uploadImageRouter logic
+const uploadImageRouter = express.Router()
+.patch('/image', authmiddlware , upload.single('profilePicture') ,async(req , res , next) => {
+  try{
+    const uploadedImageData = await uploadImage(req.file.path)
+
+    const imageData = await HabitUser.findOneAndUpdate(
+      {
+        _id : req.userInfo.userId,
+      },
+      {
+        profilePicture : {
+          url : uploadedImageData.secure_url,
+          public_id : uploadedImageData.public_id 
+        } 
+      }, 
+      {
+        new : true,
+        runValidators : true
+      }
+    )
+    if (!imageData) {
+     return res.status(404).json({ success: false,  message: 'User not found' })
+}
+    fs.unlinkSync(req.file.path)
+    res.json({
+      success : true,
+       imageData : {
+        url : imageData.profilePicture.url,
+        public_id : imageData.profilePicture.public_id
+       }
+    })
+
+
+  }catch(err){
+    next(err)
+  }
+  
+})
+app.use('/api/auth/upload/' , uploadImageRouter)
+
 // CRUD
 app.get('/', (req,res) => {
   res.send('Welcome to the Habit tracker ')
@@ -404,7 +516,7 @@ app.put('/habits/:id/' , authmiddlware , async(req,res,next) => {
   }
 })
 
-app.patch('/habits/:id/complete', authmiddlware ,async (req,res,next) => {
+app.patch('/habits/:id/complete', authmiddlware , async (req,res,next) => {
   try{
     const habitById = await Habit.findOne({
        _id: req.params.id, 

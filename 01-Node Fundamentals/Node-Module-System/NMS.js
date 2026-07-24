@@ -12,7 +12,7 @@ function sub(a, b){
 // }
 // Using module.exports again overwrites the sub so we can't use the function sub
 module.exports = {
-  add , mult : (a,b) => (a*b) , sub // sub was added fixing the problem
+  add , mult : (a , b) => (a * b) , sub // sub was added fixing the problem
 }
 
 // this function hasn't overriden the previous one cause :
