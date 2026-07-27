@@ -1,5 +1,6 @@
 const dns = require('node:dns')
 dns.setServers(['1.1.1.1', '8.8.8.8'])
+
 const path = require('path')
 const fs = require('fs')
 const mongoose = require('mongoose')
@@ -110,21 +111,51 @@ const userSchema = new mongoose.Schema({
 const HabitUser = mongoose.model('HabitUser' , userSchema)
 
 
-// const imageSchema = new mongoose.Schema({
+//AUTHENTICATION MIDDLEWARES
+const authmiddlware = (req ,res , next) => {
+    try{
+        const authHeader = req.headers['authorization']
 
-//   url : {
-//     type: String , required: true
-//   } ,
-//   publicId : {
-//     type: mongoose.Schema.Types.ObjectId , required: true
-//   } ,
-//   uploadesBy : {
-//     type : mongoose.Schema.Types.ObjectId , 
-//     ref : 'HabitUser',
-//     required : true
-//   }
-// })
-// const Image = mongoose.model('Image' , imageSchema)
+        if(!authHeader){
+            return res.status(401).json({
+                success  : false ,
+                message : 'No header'
+            })
+        }
+
+        const token = authHeader && authHeader.split(" ")[1]
+
+        if(!token){
+            return res.status(401).json({
+                success  : false ,
+                message : 'Unauthorized user'
+            })
+        }
+
+        let decodedtokenInfo
+
+        try{
+           decodedtokenInfo = jwt.verify(
+            token , process.env.JWT_SECRET
+        )
+        //jwt.verify() Returns the Decoded Payload + iat (issued at) and exp , if expired it throws an error
+        // and that's why we are using a try catch instead of and if else block
+        }catch(err){
+          return res.status(401).json({
+                success  : false ,
+                message : 'Unauthorized user'
+            })
+        }
+      
+        req.userInfo = decodedtokenInfo
+        next()
+
+    }catch(err){
+        next(err)
+    }
+
+}
+
 
 // Setting up multer and cloudinary
 cloudinary.config({
@@ -160,14 +191,12 @@ const upload = multer({
   limits :{ fileSize : 5 * 1024 * 1024} //5MB
 })
 
-//UPLOADING TO CLOUDINARY
+//UPLOADER TO CLOUDINARY
 
 const uploadImage = async (filePath) => {
-  const result = await cloudinary.cloud.upload(filePath)
+  const result = await cloudinary.uploader.upload(filePath)
   return result
 }
-
-
 
 //REGISTER AND LOGIN ROUTERS
 
@@ -290,97 +319,174 @@ authrouter.post('/login', async (req , res, next) => {
     }
 })
 
-app.use('/api/auth', authrouter)
+authrouter.post('/change-password' , authmiddlware , async (req , res , next) => { 
+  try{ 
 
-
-
-
-//AUTHENTICATION MIDDLEWARES
-const authmiddlware = (req ,res , next) => {
-    try{
-        const authHeader = req.headers['authorization']
-
-        if(!authHeader){
-            return res.status(401).json({
-                success  : false ,
-                message : 'No header'
-            })
-        }
-
-        const token = authHeader && authHeader.split(" ")[1]
-
-        if(!token){
-            return res.status(401).json({
-                success  : false ,
-                message : 'Unauthorized user'
-            })
-        }
-
-        let decodedtokenInfo
-
-        try{
-           decodedtokenInfo = jwt.verify(
-            token , process.env.JWT_SECRET
-        )
-        //jwt.verify() Returns the Decoded Payload + iat (issued at) and exp , if expired it throws an error
-        // and that's why we are using a try catch instead of and if else block
-        }catch(err){
-          return res.status(401).json({
-                success  : false ,
-                message : 'Unauthorized user'
-            })
-        }
-      
-        req.userInfo = decodedtokenInfo
-        next()
-
-    }catch(err){
-        next(err)
+    const user = await HabitUser.findById(req.userInfo.userId)
+    if(!user){
+      return res.status(400).json({
+        success : false ,
+        message : 'User not found'
+      })
     }
-
-}
-// // UPLOAD AVATAR ROUTE :uploadImageRouter logic
-const uploadImageRouter = express.Router()
-.patch('/image', authmiddlware , upload.single('profilePicture') ,async(req , res , next) => {
-  try{
-    const uploadedImageData = await uploadImage(req.file.path)
-
-    const imageData = await HabitUser.findOneAndUpdate(
-      {
-        _id : req.userInfo.userId,
-      },
-      {
-        profilePicture : {
-          url : uploadedImageData.secure_url,
-          public_id : uploadedImageData.public_id 
-        } 
-      }, 
-      {
-        new : true,
-        runValidators : true
+      const { oldpassword , newPassword } = req.body
+      const isMatch = await bcrypt.compare(oldpassword , user.password)
+      
+      if(!isMatch){
+        return res.status(400).json({
+        success : false ,
+        message : 'Old password is not correct'
+      })
       }
-    )
-    if (!imageData) {
-     return res.status(404).json({ success: false,  message: 'User not found' })
-}
-    fs.unlinkSync(req.file.path)
-    res.json({
-      success : true,
-       imageData : {
-        url : imageData.profilePicture.url,
-        public_id : imageData.profilePicture.public_id
-       }
-    })
+
+      const salt = await bcrypt.genSalt(10)
+      const newHashedPassword = await bcrypt.hash(newPassword , salt)
+
+      user.password = newHashedPassword
+      await user.save()
+
+      res.json({
+        sucess : true ,
+        message : 'Password Changed succesfully'
+      })
 
 
   }catch(err){
     next(err)
   }
-  
 })
-app.use('/api/auth/upload/' , uploadImageRouter)
 
-// CRUD
+app.use('/api/auth', authrouter)
+
+
+
+ //  AVATAR IMAGE ROUTES
+ // uploadImageRouter logic
+const ImageRouter = express.Router()
+//The commented  route was replaced by a new patch that replace and existing picture or add one if if wasn't there in the first place
+// ImageRouter.patch('/upload/profile-picture', authmiddlware , upload.single('profilePicture') ,async(req , res , next) => {
+//   try{
+//     const uploadedImageData = await uploadImage(req.file.path)
+
+//     const imageData = await HabitUser.findOneAndUpdate(
+//       {
+//         _id : req.userInfo.userId,
+//       },
+//       {
+//         profilePicture : {
+//           url : uploadedImageData.secure_url,
+//           public_id : uploadedImageData.public_id 
+//         } 
+//       }, 
+//       {
+//         new : true,
+//         runValidators : true
+//       }
+//     )
+//     if (!imageData) {
+//      return res.status(404).json({ success: false,  message: 'User not found' })
+// }
+//     fs.unlinkSync(req.file.path)
+//     res.json({
+//       success : true,
+//        imageData : {
+//         url : imageData.profilePicture.url,
+//         public_id : imageData.profilePicture.public_id
+//        }
+//     })
+
+
+//   }catch(err){
+//     next(err)
+//   }
+  
+// })
+
+ImageRouter.delete('/profile-picture', authmiddlware , async (req ,res ,next) => {
+  try{
+    const user = await HabitUser.findOne({_id : req.userInfo.userId})
+
+    if(!user){
+      return res.status(404).json({
+        success : false,
+        message : ' User not found'
+      })
+    }
+    const profilePicture = user.profilePicture.public_id
+    if(!profilePicture){
+      return res.status(400).json({
+        success : false,
+        message : `User doesn't have profile pricture` 
+      })
+    }
+
+    await cloudinary.uploader.destroy(profilePicture)
+
+    user.profilePicture.public_id = ''
+    user.profilePicture.url = ''
+
+    await user.save()
+
+    res.json({
+      success: true ,
+      message : 'Profile picture deleted sucessfully'
+    })
+    
+  }catch(err){
+    next(err)
+  }
+})
+
+ImageRouter.patch('/profile-picture' , authmiddlware , upload.single('profilePicture') ,async (req , res , next) => {
+  try{
+    if(!req.file.path){
+      return res.status(400).json({
+        success : false,
+        message : 'Choose a valid image from your file'
+      })
+    }
+    const user = await HabitUser.findById(req.userInfo.userId)
+    if(!user){
+      return res.status(404).json({
+        success : false,
+        message : ' User not found'
+      })
+    }
+
+    const oldProfilePicture = user.profilePicture.public_id
+
+    if(oldProfilePicture){
+      await cloudinary.uploader.destroy(oldProfilePicture)
+    }
+
+    const newProfilePicture = await uploadImage(req.file.path)
+    user.profilePicture.public_id = newProfilePicture.public_id
+    user.profilePicture.url = newProfilePicture.secure_url
+
+    await user.save()
+
+    fs.unlinkSync(req.file.path)
+    res.json({
+      success: true ,
+      message : 'Profile picture updated sucessfully',
+      imageData : newProfilePicture
+    })
+
+
+
+  }catch(err){
+    next(err)
+  }
+})
+
+
+app.use('/api/auth' , ImageRouter)
+
+
+
+
+
+// ------- CRUD -------
 app.get('/', (req,res) => {
   res.send('Welcome to the Habit tracker ')
 })
@@ -538,7 +644,7 @@ app.patch('/habits/:id/complete', authmiddlware , async (req,res,next) => {
       })
     }
 
-
+    
     habitById.completedDates.push(today)
     habitById.streak += 1
     const updatedHabit = await habitById.save()
