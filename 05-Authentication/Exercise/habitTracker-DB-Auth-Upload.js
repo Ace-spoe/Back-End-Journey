@@ -493,32 +493,51 @@ app.get('/', (req,res) => {
 
 app.get('/habits', authmiddlware ,async (req,res,next) => {
   try{
-    const { userId }= req.userInfo
-    const habits = await Habit.find({userId})
+
+    const page = parseInt(req.query.page) || 1
+    const limit = parseInt(req.query.limit) || 5
+    const skip = (page - 1) * limit
+    const sortBy = req.query.sortBy || 'createdAt'
+    const sortOrder = req.query.sortOrder === 'asc' ? 1 : -1
+  
+   
+     const { userId } = req.userInfo
+     const filter = {userId}
+     if(req.query.search){
+      filter.name = {
+        $regex : req.query.search , 
+        $options : 'i'
+      }
+     }
+     if(req.query.frequency){
+      filter.frequency = req.query.frequency
+     }
+
+    const habits = await Habit.find(filter)
+    .sort({[sortBy] : sortOrder})
+    .skip(skip)
+    .limit(limit)
+    
 
     if(habits.length === 0){
-      return res.json({ message: 'No habits yet' , data : [] })
+      return res.json({ message: 'No habits Found' , data : [] })
     }
 
-    if(!req.query.frequency){
-      return res.json(
-        { message: 'All habits',
-          data : habits
-        })
-    }
+    const totalCount = await Habit.countDocuments(filter)
 
-    const filtByFreq = habits.filter(habit => habit.frequency === req.query.frequency)
-
-    if (filtByFreq.length === 0) {
-      return res.status(404).json({
-        message: 'No habits with this frequency',
-        data: []
-      })
-    }
+  
     res.json({
       message: 'Filtered habits',
-      filteredData: filtByFreq
+      data: habits,
+      pagination : {
+        currentPage : page ,
+        totalPages : Math.ceil(totalCount / limit) ,
+        totalItems : totalCount
+      }
     })
+
+
+
   } catch(error){
     next(error)
   }

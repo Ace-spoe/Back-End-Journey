@@ -14,3 +14,14 @@
 ### **Tokens**
  - **JWT**(JSON Web Tokens) : 
  - `node -e "console.log(require('crypto').randomBytes(64).toString('hex'))"` : used to generated a random string
+
+
+
+### **Recuring Error log**
+- Missing await on async calls (bcrypt.compare, bcrypt.hash, bcrypt.genSalt) — happened 3+ times across login, change-password
+
+- Missing async keyword on route handlers that use await inside — happened in PUT /habits/:id, change-password route
+
+- Block-scoping (let/const) confusion — variable declared inside a try/if block, used outside it — happened with decodedtokenInfo in middleware, and the massive brace-scope bug in change-password
+
+- Auth middleware missing from route signature — happened in PATCH /habits/:id/complete
