@@ -47,8 +47,37 @@ Note.find({}).then(result => {
 async function errorHandler(error, req, res, next) {
 ```
 
+## Intermediate MongoDB Aggregation – Short Note
 
+### What is Aggregation?
+- A pipeline of stages that process documents step by step.
 
+```js
+db.collection.aggregate([
+  { stage1 },
+  { stage2 },
+  { stage3 }
+])
+
+- Quick Example – Top Categories by Sales
+JavaScriptdb.orders.aggregate([
+  { $match: { status: "completed" } },
+  {
+    $group: {
+      _id: "$category",
+      total: { $sum: "$amount" },
+      count: { $sum: 1 }
+    }
+  },
+  { $sort: { total: -1 } },
+  { $limit: 5 }
+])
+
+- Tips
+
+  - Put $match first (faster)
+  - Use indexes on fields used in $match and $sort
+  - $group is the most powerful stage
 
 
 
