@@ -10,6 +10,7 @@ const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const multer = require('multer')
 const cloudinary = require('cloudinary').v2
+const cookieParser = require('cookie-parser')
 
 dotenv.config({ path : '../../.env' })
 
@@ -29,7 +30,7 @@ mongoose.connect(process.env.MONGO_URI)
 
 
 app.use(express.json())
-
+app.use(cookieParser())
 // eslint-disable-next-line no-unused-vars
 function errorHandler (error, req, res , next){
   if (error.name === 'CastError') {
@@ -114,16 +115,17 @@ const HabitUser = mongoose.model('HabitUser' , userSchema)
 //AUTHENTICATION MIDDLEWARES
 const authmiddlware = (req ,res , next) => {
     try{
-        const authHeader = req.headers['authorization']
+        // const authHeader = req.headers['authorization']
 
-        if(!authHeader){
-            return res.status(401).json({
-                success  : false ,
-                message : 'No header'
-            })
-        }
+        // if(!authHeader){
+        //     return res.status(401).json({
+        //         success  : false ,
+        //         message : 'No header'
+        //     })
+        // }
 
-        const token = authHeader && authHeader.split(" ")[1]
+        // const token = authHeader && authHeader.split(" ")[1]
+        const token = req.cookies.token
 
         if(!token){
             return res.status(401).json({
@@ -301,10 +303,17 @@ authrouter.post('/login', async (req , res, next) => {
             expiresIn : '15m'
         }
     )
+
+    res.cookie("token", accessToken, {
+      httpOnly: true,
+      secure: false,        // true in production
+      sameSite : 'strict',
+      maxAge: 1000 * 60 * 60 * 24
+    });
+
     res.json({
         success : true, 
         message : "logged in successfully",
-        token : accessToken,
         userData : {
             ID : user._id,
             username : user.username,
