@@ -1,4 +1,4 @@
 node_modules/
 .env
 .vscode/
-04-DataBase\PostregreSQL\notes_on_postgres.md
+/04-DataBase/PostgreSQL/notes_on_postgres.md
