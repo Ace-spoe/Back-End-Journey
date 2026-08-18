@@ -166,11 +166,6 @@ const getProductAnalysis = async (req , res) => {
 
 
 
-
-
-
-
-
 app.listen(process.env.PORT, ()=>{
     console.log(`Server is listening to ${process.env.PORT}`)
 })
