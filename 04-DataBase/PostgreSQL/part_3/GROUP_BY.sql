@@ -5,12 +5,19 @@
 -- Key Rule : Every column in SELECT that is NOT an aggregate function MUST appear in GROUP BY.
 -- ===========
 
-SELECT 
-    p.name,
-    COUNT(*) AS total_products
-FROM products p
-WHERE p.category ILIKE 'office';
+-- SELECT 
+--     COUNT(*) AS total_products
+-- FROM products p
+-- WHERE p.category ILIKE 'office';
 
+
+SELECT t.name AS tag_name ,
+        COUNT(DISTINCT p.id) AS total_posts
+FROM tags t
+LEFT JOIN post_tags pt ON t.id = pt.tag_id
+LEFT JOIN posts p ON p.id = pt.post_id
+GROUP BY t.id 
+ORDER BY total_posts DESC; 
 
 
 
