@@ -203,14 +203,93 @@
 -- (Hint: You will need a LEFT JOIN, COUNT, GROUP BY, and a CASE WHEN statement.)
 
 
-SELECT p.title AS project_title,
-    CASE
-  WHEN COUNT(pa.employee_id) >= 2 THEN 'Heavy'
-  WHEN COUNT(pa.employee_id) = 1 THEN 'Light'
-  ELSE 'Empty'
- END AS workload
-FROM projects p
-LEFT JOIN project_assignments pa
-ON pa.project_id = p.id
-GROUP BY p.title
-ORDER BY p.title ASC;
+-- SELECT p.title AS project_title,
+--     CASE
+--   WHEN COUNT(pa.employee_id) >= 2 THEN 'Heavy'
+--   WHEN COUNT(pa.employee_id) = 1 THEN 'Light'
+--   ELSE 'Empty'
+--  END AS workload
+-- FROM projects p
+-- LEFT JOIN project_assignments pa
+-- ON pa.project_id = p.id
+-- GROUP BY p.title
+-- ORDER BY p.title ASC;
+
+
+
+-- Scenario:
+-- Build a database for an E-Commerce Platform.
+
+-- Requirements:
+-- Entities:
+
+-- Customers (id, name, email)
+
+-- Orders (id, customer_id, order_date, status)
+
+-- Products (id, name, price, category)
+
+-- Order_Items (order_id, product_id, quantity)
+
+-- Relationships:
+
+-- A customer can place many orders, but an order belongs to one customer (1-to-many)
+
+-- An order can contain many products, and a product can appear in many orders (many-to-many via junction table)
+
+-- 📝 Your Tasks:
+-- Task 1: Create the Schema
+-- Write the CREATE TABLE statements for all 4 tables (including the junction table). Use proper data types, primary keys, foreign keys, and constraints. 
+-- Task 2: Seed Data
+-- Insert:
+
+-- 3 customers
+
+-- 4 products
+
+-- 3 orders (distributed among customers)
+
+-- Order items (each order should have 2-3 products)
+
+-- Task 3: Write Queries
+-- Show all orders with the customer's name
+
+-- Show total revenue (sum of price × quantity) per order
+
+-- Find which products have been ordered more than 1 time
+
+-- Show all customers and how many orders they've placed (include customers with 0 orders)
+
+-- Find customers who have spent more than $100 total (using HAVING)
+DROP TABLE IF EXISTS order_products;
+DROP TABLE IF EXISTS products;
+DROP TABLE IF EXISTS orders;
+DROP TABLE IF EXISTS customers;
+CREATE TYPE status AS ENUM ('pending' , 'sent' , 'failed') ;
+CREATE TYPE category_types AS ENUM ('electronics' , 'office' , 'kitchen' , 'health');
+
+CREATE TABLE customers (
+  id SERIAL PRIMARY KEY ,
+  name TEXT NOT NULL,
+  email TEXT NOT NULL
+);
+
+CREATE TABLE orders (
+  id SERIAL PRIMARY KEY ,
+  customer_id INT REFERENCES customers(id),
+  order_date TIMESTAMP NOT NULL DEFAULT NOW(),
+  status status NOT NULL DEFAULT 'pending'
+);
+
+CREATE TABLE products (
+  id SERIAL PRIMARY KEY ,
+  name TEXT NOT NULL,
+  price NUMERIC(5,2) NOT NULL ,
+  category category_types NOT NULL 
+);
+
+CREATE TABLE order_products (
+  order_id INT REFERENCES orders(id),
+  product_id INT REFERENCES producs(id), 
+  quantity INT 
+);
