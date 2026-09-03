@@ -261,12 +261,13 @@
 -- Show all customers and how many orders they've placed (include customers with 0 orders)
 
 -- Find customers who have spent more than $100 total (using HAVING)
-DROP TABLE IF EXISTS order_products;
+DROP TABLE IF EXISTS order_items;
 DROP TABLE IF EXISTS products;
 DROP TABLE IF EXISTS orders;
 DROP TABLE IF EXISTS customers;
-CREATE TYPE status AS ENUM ('pending' , 'sent' , 'failed') ;
-CREATE TYPE category_types AS ENUM ('electronics' , 'office' , 'kitchen' , 'health');
+
+CREATE TYPE  status AS ENUM ('pending' , 'delivered' , 'shipped') ;
+CREATE TYPE  category_types AS ENUM ('Electronics' , 'Office' , 'Kitchen' , 'Health');
 
 CREATE TABLE customers (
   id SERIAL PRIMARY KEY ,
@@ -288,8 +289,92 @@ CREATE TABLE products (
   category category_types NOT NULL 
 );
 
-CREATE TABLE order_products (
-  order_id INT REFERENCES orders(id),
-  product_id INT REFERENCES producs(id), 
-  quantity INT 
+CREATE TABLE order_items (
+  order_id INT NOT NULL REFERENCES orders(id),
+  product_id INT NOT NULL REFERENCES products(id), 
+  quantity INT NOT NULL CHECK (quantity > 0)
 );
+
+
+-- 3 Customers
+INSERT INTO customers (name, email) VALUES 
+('Alice Johnson', 'alice@example.com'),
+('Bob Smith', 'bob@example.com'),
+('Charlie Brown', 'charlie@example.com');
+
+-- 4 Products
+INSERT INTO products (name, price, category) VALUES 
+('Laptop', 999.99, 'Electronics'),
+('Wireless Mouse', 29.99, 'Electronics'),
+('Coffee Mug', 14.50, 'Kitchen'),
+('Notebook', 5.99, 'Office');
+
+-- 3 Orders
+INSERT INTO orders (customer_id, order_date, status) VALUES 
+(1, '2026-01-15', 'delivered'),
+(2, '2026-02-20', 'shipped'),
+(1, '2026-03-05', 'pending');
+
+-- Order Items (Each order has 2-3 products)
+INSERT INTO order_items (order_id, product_id, quantity) VALUES 
+-- Order 1: Laptop + Mouse
+(1, 1, 1),
+(1, 2, 2),
+
+-- Order 2: Coffee Mug + Notebook
+(2, 3, 3),
+(2, 4, 5),
+
+-- Order 3: Laptop + Coffee Mug + Notebook
+(3, 1, 1),
+(3, 3, 2),
+(3, 4, 10);
+
+-- Show all orders with the customer's name
+-- SELECT o.id AS order_id , c.name
+-- FROM orders o 
+-- JOIN customers c 
+-- ON c.id = o.customer_id;
+
+-- Show total revenue (sum of price × quantity) per order
+
+-- SELECT o.id AS order_id , SUM (p.price * oi.quantity)
+-- FROM orders o 
+-- JOIN order_items oi
+-- ON oi.order_id = o.id
+-- JOIN products p
+-- ON oi.product_id = p.id
+-- GROUP BY o.id;
+
+-- Find which products have been ordered more than 1 time
+
+-- SELECT p.name , SUM(oi.quantity)
+-- FROM products p
+-- JOIN order_items oi
+-- ON p.id = oi.product_id
+-- GROUP BY p.name
+-- HAVING SUM(oi.quantity) > 1;
+
+
+-- Show all customers and how many orders they've placed (include customers with 0 orders)
+-- SELECT c.name , SUM(oi.quantity) AS total_orders
+-- FROM customers c
+-- LEFT JOIN orders o
+-- ON o.customer_id = c.id
+-- LEFT JOIN order_items oi
+-- ON oi.order_id = o.id
+-- GROUP BY c.name;
+
+
+-- Find customers who have spent more than $100 total (using HAVING)
+SELECT c.name , SUM(p.price * oi.quantity) AS total_spent
+FROM customers c
+JOIN orders o
+ON o.customer_id = c.id
+JOIN order_items oi
+ON oi.order_id = o.id
+JOIN products p
+ON p.id = oi.product_id
+GROUP BY c.name
+HAVING SUM(p.price * oi.quantity) > 100;
+
