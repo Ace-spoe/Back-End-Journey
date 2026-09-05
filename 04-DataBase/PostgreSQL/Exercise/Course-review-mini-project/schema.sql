@@ -19,7 +19,7 @@ CREATE TABLE  reviews (
     course_id INT NOT NULL REFERENCES courses(id),
     rating INT NOT NULL CHECK (rating BETWEEN 1 AND 5),
     body TEXT
+    UNIQUE (user_id, course_id) -- this was added later after making the assumption that a user can not rate the same course twice
 );
-
 
 
